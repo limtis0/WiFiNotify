@@ -24,6 +24,8 @@ class WiFiService : Service() {
     private lateinit var connectivityManager: ConnectivityManager
     private lateinit var wifiManager: WifiManager
 
+    private val networkCallback = createNetworkCallback()
+
     override fun onCreate() {
         super.onCreate()
 
@@ -59,6 +61,13 @@ class WiFiService : Service() {
         super.onDestroy()
     }
 
+    private fun createNetworkCallback(): NetworkCallback {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            return createNetworkCallbackAndroid12Plus()
+        }
+        return createNetworkCallbackBelowAndroid12()
+    }
+
     @Suppress("DEPRECATION")
     private fun createNetworkCallbackBelowAndroid12(): NetworkCallback {
         return object : NetworkCallback() {
@@ -90,9 +99,6 @@ class WiFiService : Service() {
             }
         }
     }
-
-    // Callback on network updates
-    private val networkCallback = createNetworkCallbackBelowAndroid12()
 
     private fun createNotificationChannel() {
         val serviceChannel = NotificationChannel(CHANNEL_ID, CHANNEL_NAME,
