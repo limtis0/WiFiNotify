@@ -12,7 +12,7 @@ class MainActivity : AppCompatActivity() {
 
         // Start the service, if it is not started yet
         val serviceIntent = Intent(this, WiFiService::class.java)
-        val isServiceRunning = (PendingIntent.getService(
+        val isServiceRunning = (PendingIntent.getForegroundService(
             this,
             0,
             serviceIntent,
@@ -20,7 +20,7 @@ class MainActivity : AppCompatActivity() {
         ) != null)
 
         if (!isServiceRunning) {
-            startService(serviceIntent)  // TODO: Set as foreground
+            startForegroundService(serviceIntent)  // TODO: Set as foreground
         }
 
         // Toast message
