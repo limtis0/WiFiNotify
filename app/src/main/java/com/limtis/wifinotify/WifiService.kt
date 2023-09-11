@@ -12,6 +12,7 @@ import android.net.ConnectivityManager.NetworkCallback
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
+import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
 import android.os.IBinder
 import android.widget.Toast
@@ -61,15 +62,6 @@ class WiFiService : Service() {
     @Suppress("DEPRECATION")
     private fun createNetworkCallbackBelowAndroid12(): NetworkCallback {
         return object : NetworkCallback() {
-//            override fun onCapabilitiesChanged(
-//                network: Network,
-//                networkCapabilities: NetworkCapabilities
-//            ) {
-//                super.onCapabilitiesChanged(network, networkCapabilities)
-//
-//
-//            }
-
             // Called when the framework connects and has declared a new network ready for use
             override fun onAvailable(network: Network) {
                 val connectionInfo = wifiManager.connectionInfo
@@ -82,14 +74,19 @@ class WiFiService : Service() {
 
     @RequiresApi(31)
     private fun createNetworkCallbackAndroid12Plus(): NetworkCallback {
-        return object : NetworkCallback() {  // FLAG?
+        return object : NetworkCallback(
+            FLAG_INCLUDE_LOCATION_INFO
+        ) {
             override fun onCapabilitiesChanged(
                 network: Network,
                 networkCapabilities: NetworkCapabilities
             ) {
                 super.onCapabilitiesChanged(network, networkCapabilities)
 
-                // TODO: Get SSID and log it
+                val wifiInfo = networkCapabilities.transportInfo as WifiInfo?
+                val ssid = wifiInfo?.ssid ?: "0"
+
+                Toast.makeText(applicationContext, ssid, Toast.LENGTH_SHORT).show()
             }
         }
     }
