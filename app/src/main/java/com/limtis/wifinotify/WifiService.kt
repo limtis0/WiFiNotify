@@ -1,11 +1,7 @@
 package com.limtis.wifinotify
 
-import android.app.Notification
-import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.app.Service
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
@@ -17,10 +13,8 @@ import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.IBinder
-import android.provider.Settings
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.core.app.NotificationCompat
 
 
 class WiFiService : Service() {
@@ -53,8 +47,8 @@ class WiFiService : Service() {
         connectivityManager.registerNetworkCallback(networkRequest, networkCallback)
 
         // Start as Foreground Service
-        createNotificationChannel()
-        val foregroundNotification = createForegroundNotification()
+        Notifications.createNotificationChannel(notificationManager)
+        val foregroundNotification = Notifications.createForegroundNotification(this)
         startForeground(FOREGROUND_SERVICE_ID, foregroundNotification)
 
         return START_STICKY
@@ -88,6 +82,8 @@ class WiFiService : Service() {
 
     @RequiresApi(31)
     private fun createNetworkCallbackAndroid12Plus(): NetworkCallback {
+        val context = this
+
         return object : NetworkCallback(
             FLAG_INCLUDE_LOCATION_INFO
         ) {
@@ -100,90 +96,18 @@ class WiFiService : Service() {
                 val wifiInfo = networkCapabilities.transportInfo as WifiInfo? ?: return
                 val ssid = wifiInfo.ssid
 
-                notificationManager.notify(WIFI_NOTIFICATION_ID, createWiFiNotification())
+                val notification = Notifications.createWiFiNotification(context)
+                notificationManager.notify(WIFI_NOTIFICATION_ID, notification)
 
                 Toast.makeText(applicationContext, ssid, Toast.LENGTH_SHORT).show()
             }
         }
     }
 
-    private fun createNotificationChannel() {
-        val serviceChannel = NotificationChannel(CHANNEL_ID, CHANNEL_NAME,
-            CHANNEL_DEFAULT_IMPORTANCE)
-        notificationManager.createNotificationChannel(serviceChannel)
-    }
-
-    private fun createForegroundNotification(): Notification {
-        val notificationTitle = "Wi-Fi Notify - Service is running"
-
-        val pendingIntent = PendingIntent.getActivity(
-            this,
-            0,
-            Intent(),
-            PendingIntent.FLAG_IMMUTABLE
-        )
-
-        val notificationBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle(notificationTitle)
-            // .setSmallIcon(R.drawable.ic_notification)
-            .setContentIntent(pendingIntent)
-            .setOngoing(false)
-            .setAutoCancel(true)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-
-        return notificationBuilder.build()
-    }
-
-    private fun createWiFiNotification(): Notification {
-        val intent: Intent
-        val clickAction: PendingIntent
-        val notificationText: String
-
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            intent = Intent(Settings.ACTION_WIFI_SETTINGS)
-            clickAction = PendingIntent.getActivity(
-                this,
-                0,
-                intent,
-                PendingIntent.FLAG_IMMUTABLE
-            )
-            notificationText = "Нажмите, чтобы открыть настройки"
-//        } else {
-//            // If Android version is lower than Q, turn off Wi-Fi
-//            intent = Intent(this, wifiOffReceiver::class.java)
-//            clickAction = PendingIntent.getBroadcast(
-//                this,
-//                0,
-//                intent,
-//                PendingIntent.FLAG_IMMUTABLE
-//            )
-//            notificationText = "Нажмите, чтобы выключить Wi-Fi"
-//        }
-
-        val builder = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(androidx.core.R.drawable.notification_icon_background)  // TODO: Add Icons
-            .setContentTitle("Если не выбрал с тарификацией трафика - срочно выключи Wi-Fi")
-            .setContentText(notificationText)
-            .setContentIntent(clickAction)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-
-        return builder.build()
-    }
-
     // Turns off WiFi on notification clicked
-    private val wifiOffReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            if (context != null) {
-                wifiManager.isWifiEnabled = false
-            }
-        }
-    }
+
 
     companion object {
-        const val CHANNEL_ID = "WiFiNotify"
-        const val CHANNEL_NAME = "Wi-Fi Notify"
-        const val CHANNEL_DEFAULT_IMPORTANCE = NotificationManager.IMPORTANCE_HIGH
-
         const val FOREGROUND_SERVICE_ID = 1
         const val WIFI_NOTIFICATION_ID = 2
     }
