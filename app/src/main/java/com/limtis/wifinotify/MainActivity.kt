@@ -1,10 +1,7 @@
 package com.limtis.wifinotify
 
-import android.app.PendingIntent
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
-import android.view.View.OnClickListener
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.limtis.wifinotify.databinding.ActivityMainBinding
@@ -21,14 +18,16 @@ class MainActivity : AppCompatActivity() {
         val view = binding.root
         setContentView(view)
 
+        // Ask for permissions on start
         permissionManager = PermissionManager(this)
+        permissionManager.checkPermissionsAndRequest()
 
         binding.startButton.setOnClickListener {
             val permissionsGranted = permissionManager.checkPermissionsAndRequest()
 
             val message = if (permissionsGranted) {
                 startForegroundService(Intent(this, WiFiService::class.java))
-                "Не забудьте отключить оптимизацию батареи для этого приложения"
+                "Не забудьте отключить оптимизацию батареи"
             } else {
                 "Невозможно запустить сервис без разрешений"
             }

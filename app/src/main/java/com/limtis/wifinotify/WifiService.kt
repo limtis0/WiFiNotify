@@ -21,6 +21,7 @@ class WiFiService : Service() {
     private lateinit var connectivityManager: ConnectivityManager
     private lateinit var wifiManager: WifiManager
     private lateinit var notificationManager: NotificationManager
+    private lateinit var wifiSet: WifiSet
 
     private val networkCallback = createNetworkCallback()
 
@@ -30,6 +31,7 @@ class WiFiService : Service() {
         connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         wifiManager = getSystemService(WifiManager::class.java)
         notificationManager = getSystemService(NotificationManager::class.java)
+        wifiSet = WifiSet(this)
     }
 
     // Required override for Service() implementation
@@ -69,13 +71,16 @@ class WiFiService : Service() {
 
     @Suppress("DEPRECATION")
     private fun createNetworkCallbackBelowAndroid12(): NetworkCallback {
+        val context = this
+
         return object : NetworkCallback() {
             // Called when the framework connects and has declared a new network ready for use
             override fun onAvailable(network: Network) {
                 val connectionInfo = wifiManager.connectionInfo
                 val ssid = connectionInfo.ssid
 
-                Toast.makeText(applicationContext, ssid, Toast.LENGTH_SHORT).show()
+                sendNotificationOnNewSSID(context, ssid)
+                Toast.makeText(applicationContext, ssid, Toast.LENGTH_SHORT).show()  // TODO: Delete
             }
         }
     }
@@ -96,16 +101,22 @@ class WiFiService : Service() {
                 val wifiInfo = networkCapabilities.transportInfo as WifiInfo? ?: return
                 val ssid = wifiInfo.ssid
 
-                val notification = Notifications.createWiFiNotification(context)
-                notificationManager.notify(WIFI_NOTIFICATION_ID, notification)
-
-                Toast.makeText(applicationContext, ssid, Toast.LENGTH_SHORT).show()
+                sendNotificationOnNewSSID(context, ssid)
+                Toast.makeText(applicationContext, ssid, Toast.LENGTH_SHORT).show()  // TODO: Delete
             }
         }
     }
 
-    // Turns off WiFi on notification clicked
+    private fun sendNotificationOnNewSSID(context: Context, ssid: String) {
+        if (wifiSet.contains(ssid)) {
+            return
+        }
 
+        val notification = Notifications.createWiFiNotification(context)
+        notificationManager.notify(WIFI_NOTIFICATION_ID, notification)
+
+        wifiSet.add(ssid)
+    }
 
     companion object {
         const val FOREGROUND_SERVICE_ID = 1

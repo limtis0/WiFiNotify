@@ -27,7 +27,7 @@ class Notifications {
         }
 
         fun createForegroundNotification(context: Context): Notification {
-            val notificationTitle = "Wi-Fi Notify - Service is running"
+            val notificationTitle = "Wi-Fi Notify - Сервис в работе"
 
             val pendingIntent = PendingIntent.getActivity(
                 context,
