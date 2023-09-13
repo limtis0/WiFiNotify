@@ -13,7 +13,6 @@ import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.IBinder
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 
 
@@ -80,7 +79,6 @@ class WiFiService : Service() {
                 val ssid = connectionInfo.ssid
 
                 sendNotificationOnNewSSID(context, ssid)
-                Toast.makeText(applicationContext, ssid, Toast.LENGTH_SHORT).show()  // TODO: Delete
             }
         }
     }
@@ -102,13 +100,12 @@ class WiFiService : Service() {
                 val ssid = wifiInfo.ssid
 
                 sendNotificationOnNewSSID(context, ssid)
-                Toast.makeText(applicationContext, ssid, Toast.LENGTH_SHORT).show()  // TODO: Delete
             }
         }
     }
 
     private fun sendNotificationOnNewSSID(context: Context, ssid: String) {
-        if (wifiSet.contains(ssid)) {
+        if (wifiSet.contains(ssid) || ssid == "<unknown ssid>") {
             return
         }
 

@@ -20,10 +20,10 @@ class MainActivity : AppCompatActivity() {
 
         // Ask for permissions on start
         permissionManager = PermissionManager(this)
-        permissionManager.checkPermissionsAndRequest()
+        permissionManager.checkPermissions()
 
         binding.startButton.setOnClickListener {
-            val permissionsGranted = permissionManager.checkPermissionsAndRequest()
+            val permissionsGranted = permissionManager.checkPermissions()
 
             val message = if (permissionsGranted) {
                 startForegroundService(Intent(this, WiFiService::class.java))

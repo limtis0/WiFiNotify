@@ -41,11 +41,6 @@ class WifiSet(context: Context) {
         save()
     }
 
-    fun remove(item: String) {
-        set.remove(item)
-        save()
-    }
-
     fun contains(item: String): Boolean {
         return set.contains(item)
     }

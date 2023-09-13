@@ -38,7 +38,7 @@ class Notifications {
 
             val notificationBuilder = NotificationCompat.Builder(context, CHANNEL_ID)
                 .setContentTitle(notificationTitle)
-                // .setSmallIcon(R.drawable.ic_notification)
+                .setSmallIcon(R.drawable.ic_stat_wifi_off)
                 .setContentIntent(pendingIntent)
                 .setOngoing(false)
                 .setAutoCancel(true)
@@ -68,11 +68,11 @@ class Notifications {
             }
 
             val builder = NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(androidx.core.R.drawable.notification_icon_background)  // TODO: Add Icons
-                .setContentTitle("Если не выбрал с тарификацией трафика - срочно выключи Wi-Fi")
+                .setSmallIcon(R.drawable.ic_stat_wifi_off)
+                .setContentTitle("Если не выбрали тарификацию трафика - срочно выключите Wi-Fi")
                 .setContentText(notificationText)
                 .setContentIntent(clickAction)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
 
             return builder.build()
         }
