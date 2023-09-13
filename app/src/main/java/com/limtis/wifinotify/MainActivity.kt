@@ -3,31 +3,37 @@ package com.limtis.wifinotify
 import android.app.PendingIntent
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
+import android.view.View.OnClickListener
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.limtis.wifinotify.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var permissionManager: PermissionManager
+    private lateinit var binding: ActivityMainBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Start the service, if it is not started yet
-        val serviceIntent = Intent(this, WiFiService::class.java)
-        val isServiceRunning = (PendingIntent.getForegroundService(
-            this,
-            0,
-            serviceIntent,
-            PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
-        ) != null)
+        // Bind default view
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
 
-        if (!isServiceRunning) {
-            startForegroundService(serviceIntent)  // TODO: Set as foreground
+        permissionManager = PermissionManager(this)
+
+        binding.startButton.setOnClickListener {
+            val permissionsGranted = permissionManager.checkPermissionsAndRequest()
+
+            val message = if (permissionsGranted) {
+                startForegroundService(Intent(this, WiFiService::class.java))
+                "Не забудьте отключить оптимизацию батареи для этого приложения"
+            } else {
+                "Невозможно запустить сервис без разрешений"
+            }
+
+            Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT).show()
         }
-
-        // Toast message
-        val message = if (!isServiceRunning) "Started the service!" else "Service is already running!"
-
-        val duration = Toast.LENGTH_SHORT
-        val toast = Toast.makeText(applicationContext, message, duration)
-        toast.show()
     }
 }
