@@ -8,9 +8,14 @@ import android.Manifest
 import android.content.Context
 import android.os.Build
 
-
 class PermissionManager(private val activity: Activity) {
     fun checkPermissions(): Boolean {
+        // Location is needed for getting SSID
+        val locationPermissionGranted = isPermissionGranted(Manifest.permission.ACCESS_FINE_LOCATION)
+        if (!locationPermissionGranted) {
+            requestPermission(Manifest.permission.ACCESS_FINE_LOCATION, LOCATION_PERMISSION_REQUEST_CODE)
+        }
+
         // Android 13+ requires POST_NOTIFICATIONS
         val notificationsPermissionGranted: Boolean
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -35,14 +40,7 @@ class PermissionManager(private val activity: Activity) {
             bgLocationGranted = true
         }
 
-        // Location is needed for getting SSID
-        val locationPermissionGranted = isPermissionGranted(Manifest.permission.ACCESS_FINE_LOCATION)
-
-        if (!locationPermissionGranted) {
-            requestPermission(Manifest.permission.ACCESS_FINE_LOCATION, LOCATION_PERMISSION_REQUEST_CODE)
-        }
-
-        return notificationsPermissionGranted && bgLocationGranted && locationPermissionGranted
+        return locationPermissionGranted && notificationsPermissionGranted && bgLocationGranted
     }
 
     private fun isPermissionGranted(permission: String): Boolean {

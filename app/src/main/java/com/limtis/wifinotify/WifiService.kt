@@ -15,7 +15,6 @@ import android.os.Build
 import android.os.IBinder
 import androidx.annotation.RequiresApi
 
-
 class WiFiService : Service() {
     private lateinit var connectivityManager: ConnectivityManager
     private lateinit var wifiManager: WifiManager
